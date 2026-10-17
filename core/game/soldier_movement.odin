@@ -54,16 +54,24 @@ soldier_control :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, au
 	soldier.arsenal.fired = false // set again by the weapon if a shot goes off this tick
 
 	input := resolve_left_right(soldier)
-	jets_control(world, resources, soldier, input)
+	if soldier.gear == .Rope do rope_control(world, resources, id, soldier, out)
+	else do jets_control(world, resources, soldier, input)
 	if armed do combat_control(world, resources, id, out)
-	prone_control(resources, soldier, &input)
-	if armed do combat_after_prone(resources, soldier)
+	// A rope out takes the locomotion away: hung, reeled, or throwing, the soldier
+	// doesn't lie down, cover-check, walk or roll (the weapon still works). Each step
+	// stays in its place in the original's order, so a soldier without a rope out moves
+	// exactly as before.
+	afoot := soldier.rope.phase == .None
+	if afoot {
+		prone_control(resources, soldier, &input)
+		if armed do combat_after_prone(resources, soldier)
+	}
 	animation_slowdown(soldier)
-	cover_check(world, resources, id)
+	if afoot do cover_check(world, resources, id)
 	antics_interrupt(resources.animations, soldier, input)
-	movement_control(world, resources, soldier, input)
+	if afoot do movement_control(world, resources, soldier, input)
 	if armed do combat_reload_animation(resources, soldier)
-	roll_control(resources, soldier, input)
+	if afoot do roll_control(resources, soldier, input)
 	body_pose_control(resources, soldier)
 	sniper_view(soldier)
 }
@@ -224,7 +232,9 @@ cover_check :: proc(world: ^World, resources: ^Resources, id: Soldier_Id) {
 @(private = "file")
 animation_slowdown :: proc(soldier: ^Soldier) {
 	legs := &soldier.pose.legs
-	if legs.speed <= 1 do return
+	// A rope out: the roll's slowed pace is a pose, not speeded-up play — it must not
+	// rob the swing's or the climb's momentum.
+	if soldier.rope.phase != .None || legs.speed <= 1 do return
 
 	#partial switch legs.id {
 	case .Jump, .Jump_Side, .Roll, .Roll_Back, .Prone, .Run, .Run_Back:

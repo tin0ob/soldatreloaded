@@ -335,10 +335,11 @@ part_shown :: proc(part: Part, outfit: Outfit) -> bool {
 	return true
 }
 
-// The jets burn while they are held and have fuel left.
+// The jets burn while they are held and have fuel left; a rope soldier's key throws and
+// hangs on the rope instead, so no flame burns.
 @(private = "package")
 soldier_jetting :: proc(soldier: ^sim.Soldier) -> bool {
-	return .Jet in soldier.controls.buttons && soldier.body.jet_fuel > 0
+	return soldier.gear == .Jets && .Jet in soldier.controls.buttons && soldier.body.jet_fuel > 0
 }
 
 // The shirt, worn over the player's own: the team's (the original's ApplyShirtColorFromTeam).

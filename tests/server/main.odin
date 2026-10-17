@@ -796,14 +796,14 @@ respawn_at_once :: proc(t: ^testing.T) {
 // on, the knife first among the secondaries; with none on, the fists.
 @(test)
 loadouts_allowed :: proc(t: ^testing.T) {
-	testing.expect_value(t, game.loadout_allowed({.AK74, .LAW}), game.Loadout{.AK74, .LAW})
-	testing.expect_value(t, game.loadout_allowed({.AK74, .LAW}, {.AK74, .LAW}), game.Loadout{.Desert_Eagles, .Knife})
-	testing.expect_value(t, game.loadout_allowed({.Desert_Eagles, .Knife}, {.Desert_Eagles, .Knife}), game.Loadout{.MP5, .USSOCOM})
-	testing.expect_value(t, game.loadout_allowed({.Punch, .Chainsaw}, {.Chainsaw}), game.Loadout{.Punch, .Knife})
+	testing.expect_value(t, game.loadout_allowed({.AK74, .LAW, .Jets}), game.Loadout{.AK74, .LAW, .Jets})
+	testing.expect_value(t, game.loadout_allowed({.AK74, .LAW, .Jets}, {.AK74, .LAW}), game.Loadout{.Desert_Eagles, .Knife, .Jets})
+	testing.expect_value(t, game.loadout_allowed({.Desert_Eagles, .Knife, .Jets}, {.Desert_Eagles, .Knife}), game.Loadout{.MP5, .USSOCOM, .Jets})
+	testing.expect_value(t, game.loadout_allowed({.Punch, .Chainsaw, .Jets}, {.Chainsaw}), game.Loadout{.Punch, .Knife, .Jets})
 	primaries := res.Weapon_Set{.Desert_Eagles, .MP5, .AK74, .Steyr_AUG, .Spas12, .Ruger77, .M79, .Barrett, .Minimi, .Minigun}
 	every := primaries + {.USSOCOM, .Knife, .Chainsaw, .LAW}
-	testing.expect_value(t, game.loadout_allowed({.Minigun, .Knife}, primaries), game.Loadout{.Punch, .Knife})
-	testing.expect_value(t, game.loadout_allowed({.Minigun, .Knife}, every), game.Loadout{.Punch, .Punch})
+	testing.expect_value(t, game.loadout_allowed({.Minigun, .Knife, .Jets}, primaries), game.Loadout{.Punch, .Knife, .Jets})
+	testing.expect_value(t, game.loadout_allowed({.Minigun, .Knife, .Jets}, every), game.Loadout{.Punch, .Punch, .Jets})
 	testing.expect_value(t, res.guns_off(res.ALL_GUNS), res.Weapon_Set{})
 	none: res.Gun_Settings
 	testing.expect_value(t, res.guns_off(none), every)

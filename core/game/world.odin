@@ -72,6 +72,7 @@ Rules :: struct {
 	respawn_max_wave: i32,  // ticks
 	max_grenades:     i32,
 	medikit_cooldown: i32,  // ticks
+	rope:             bool, // the rope gear is allowed (sv_rope); off, a rope soldier's boots are jets
 	guns_off:         res.Weapon_Set, // the guns no soldier is given
 }
 

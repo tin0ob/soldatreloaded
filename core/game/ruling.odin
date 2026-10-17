@@ -52,6 +52,7 @@ Respawn :: struct {
 	team:      res.Team,
 	primary:   res.Weapon,
 	secondary: res.Weapon,
+	gear:      res.Gear,
 	pos:       utils.Vec2,
 }
 

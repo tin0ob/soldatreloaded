@@ -369,7 +369,7 @@ soldier_fire :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, out: 
 		soldier.body.velocity -= velocity * utils.Vec2{0.0412, 0.041}
 	}
 	if shooting == .Minigun {
-		jetting := .Jet in soldier.controls.buttons && soldier.body.jet_fuel > 0
+		jetting := soldier.gear == .Jets && .Jet in soldier.controls.buttons && soldier.body.jet_fuel > 0
 		push := velocity * utils.Vec2{0.0012, 0.0009} if jetting else velocity * utils.Vec2{0.0082, 0.0078}
 		if soldier.carrying.held != nil do push *= utils.Vec2{0.5, 0.7} // anything held: the flag, even the parachute
 		push.x *= 0.6
@@ -611,7 +611,7 @@ movement_inaccuracy :: proc(resources: ^Resources, soldier: ^Soldier) -> f32 {
 	case .Jump, .Jump_Side, .Run, .Run_Back, .Roll, .Roll_Back:
 		return accuracy * 7.0
 	}
-	if .Jet in soldier.controls.buttons && soldier.body.jet_fuel > 0 do return accuracy * 7.0
+	if .Jet in soldier.controls.buttons && (soldier.gear == .Jets ? soldier.body.jet_fuel > 0 : soldier.rope.phase != .None) do return accuracy * 7.0
 
 	lying_or_crouched :=
 		legs.id == .Prone || legs.id == .Prone_Move || legs.id == .Crouch || legs.id == .Crouch_Run || legs.id == .Crouch_Run_Back

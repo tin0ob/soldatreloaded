@@ -63,6 +63,7 @@ Sound :: struct {
 	wind:       Reserved,
 	before:     [sim.MAX_PLAYERS]sim.Soldier, // everyone as of the tick before
 	whizzed:    [sim.MAX_BULLETS]bool,        // the bullets that have already whizzed past me
+	rope_ticks: [sim.MAX_PLAYERS]i32,         // ticks each soldier's rope has been throwing
 	ringing:    i32,                          // ticks of ringing ears left
 }
 
@@ -135,5 +136,6 @@ sound_silence :: proc(s: ^Sound) {
 	s.wind = {}
 	s.before = {}
 	s.whizzed = {}
+	s.rope_ticks = {}
 	s.ringing = 0
 }

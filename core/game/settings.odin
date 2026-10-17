@@ -17,6 +17,7 @@ Game_Settings :: struct {
 	medikit_cooldown: i32,  // seconds before a second medikit
 	kits_collide:     bool, // bullets and blasts knock kits about
 	guns_collide:     bool, // and dropped guns
+	rope:             bool, // the rope gear is allowed (sv_rope); off, a rope soldier's boots are jets
 	gravity:          f32,  // pulling everything down, each tick
 	weapons:          res.Weapon_Table, // every weapon's numbers: Soldat's own (SOLDAT_WEAPONS), or a server's
 }
@@ -29,6 +30,7 @@ DEFAULT_GAME_SETTINGS :: Game_Settings {
 	respawn_max_wave = 240,
 	max_grenades     = 2,
 	medikit_cooldown = 2,
+	rope             = false,
 	gravity          = 0.06,
 	weapons          = SOLDAT_WEAPONS,
 }

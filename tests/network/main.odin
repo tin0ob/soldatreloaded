@@ -20,7 +20,7 @@ import "../../core/utils"
 tables :: proc(t: ^testing.T) {
 	testing.expect(t, len(net.SOLDIER_OWNED_FIELDS) >= 30, "the owned half has its fields")
 	testing.expect(t, len(net.SOLDIER_SERVED_FIELDS) > 25, "the served half has its fields")
-	testing.expect_value(t, len(net.SOLDIER_LOADOUT_FIELDS), 2) // the primary and the secondary
+	testing.expect_value(t, len(net.SOLDIER_LOADOUT_FIELDS), 3) // the primary, the secondary and the gear
 	testing.expect(t, len(net.THING_FIELDS) > 20, "a thing has its fields")
 	testing.expect_value(t, len(net.LOOK_FIELDS), 10) // the style, five colours, the hair, the headgear, the chain and the eyewear
 	for f in net.SOLDIER_OWNED_FIELDS {
@@ -349,7 +349,7 @@ streams :: proc(t: ^testing.T) {
 		free(server)
 		free(client)
 	}
-	server.world.soldiers[0].loadout = {.Desert_Eagles, .Knife} // a gun to fire: none picked is the fists
+	server.world.soldiers[0].loadout = {.Desert_Eagles, .Knife, .Jets} // a gun to fire: none picked is the fists
 	game.soldier_place(server, 0, .Alpha, remote = true)
 	game.soldier_place(server, 1, .Bravo, remote = false)
 	run(server, 120, {.Right, .Jet}) // past the spawn protection

@@ -50,6 +50,7 @@ Host_Settings :: struct {
 	aimbot_bots:        bool `jsoncomment:"the bots lead every shot as the game will fly it, at the head, the chest or the legs; false for the original's aim, a guess spread by each bot's accuracy"`,
 	aimbot_miss_chance: i32 `jsoncomment:"with aimbot_bots, the percent of shots a bot of typical accuracy throws wide on purpose; a sharper bot fewer, a sloppier more, by its profile and the difficulty; 0 none"`,
 	max_grenades:       i32 `jsoncomment:"the grenades a soldier carries at most, and is placed with, 0 to 5; 0 for none, and no grenade kits on the maps"`,
+	rope:               bool `jsoncomment:"the rope gear replaces the jets for a soldier that chooses it in the weapons menu; off, every soldier's boots are jets"`,
 	vote_percent:       i32 `jsoncomment:"the percentage of players whose yes passes a vote"`,
 	scripts:            string `jsoncomment:"the folder of Lua scripts the server runs: every .lua in it, in name order (docs/scripting.md); a .lua.disabled is passed over; none ship with the server, and examples are at https://github.com/soldatreloaded/soldatreloaded-scripts; empty for none"`,
 }

@@ -74,6 +74,7 @@ settings_from :: proc(offline: res.Offline_Settings) -> sim.Game_Settings {
 	s.respawn_min_wave = s.respawn_time
 	s.respawn_max_wave = s.respawn_time + wave
 	s.max_grenades = clamp(offline.max_grenades, 0, 5)
+	s.rope = offline.rope
 	return s
 }
 
@@ -193,6 +194,7 @@ spawn :: proc(game: ^sim.Game, id: sim.Soldier_Id, team: res.Team, loadout: sim.
 		team      = team,
 		primary   = loadout.primary,
 		secondary = loadout.secondary,
+		gear      = loadout.gear,
 		pos       = sim.spawn_point(game.world.polymap, team, &game.world.rng),
 	}
 	sim.rule(&game.world, &game.resources, respawn, &game.output)
@@ -229,7 +231,7 @@ bots_seat :: proc(match: ^Match, counts: res.Bot_Settings) {
 bot_spawn :: proc(match: ^Match, slot: sim.Soldier_Id, team: res.Team) {
 	profile := &match.bots.brains[slot].profile
 	match.game.world.soldiers[slot].player = {look = ai.profile_look(profile), bot = true}
-	spawn(match.game, slot, team, {profile.favourite, profile.secondary})
+	spawn(match.game, slot, team, {profile.favourite, profile.secondary, .Jets})
 }
 
 // /addbot [name], /addbot1 [name] on alpha, /addbot2 [name] on bravo: a bot by that

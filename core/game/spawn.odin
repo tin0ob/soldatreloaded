@@ -46,6 +46,7 @@ soldier_place :: proc(g: ^Game, slot: Soldier_Id, team: res.Team, remote: bool) 
 		team      = team,
 		primary   = loadout.primary,
 		secondary = loadout.secondary,
+		gear      = loadout.gear,
 	}
 	if team != .Spectator do respawn.pos = soldier_spawn_point(&g.world, slot, team)
 	soldier.remote = remote

@@ -100,6 +100,7 @@ judge_respawn :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, out:
 		team      = soldier.team,
 		primary   = loadout.primary,
 		secondary = loadout.secondary,
+		gear      = loadout.gear,
 		pos       = pos,
 	}
 	rule(world, resources, respawn, out)

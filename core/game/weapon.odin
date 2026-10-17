@@ -115,7 +115,7 @@ loadout_allowed :: proc(chosen: Loadout, off: res.Weapon_Set = {}) -> Loadout {
 	if !weapon_is_secondary(secondary) || secondary in off {
 		secondary = .Knife if .Knife not_in off else first_on(.USSOCOM, .LAW, off)
 	}
-	return {primary, secondary}
+	return {primary, secondary, chosen.gear}
 }
 
 // The first gun from `first` to `last` that isn't `off`; the fists if none is.

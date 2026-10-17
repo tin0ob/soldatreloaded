@@ -274,7 +274,7 @@ hello :: proc(sv: ^Server, peer: net.Peer, e: ^net.Event) {
 	soldier := &sv.game.world.soldiers[slot]
 	soldier.player.look = m.look
 	soldier.player.bot = false
-	soldier.loadout = {primary = m.primary, secondary = m.secondary}
+	soldier.loadout = {primary = m.primary, secondary = m.secondary, gear = m.gear}
 	soldier.tally = {} // the slot's last occupant's tally is not its
 	place(sv, slot)
 

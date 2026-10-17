@@ -198,6 +198,7 @@ menus_follow :: proc(match: ^Match) {
 	for &soldier, i in match.game.world.soldiers do menus.players[i] = soldier.active
 	menus.me = match.me
 	menus.guns_off = match.game.settings.guns_off
+	menus.rope = match.game.settings.rope
 	if match.mode == .Online {
 		menus.map_count = int(match.line.map_reply.count)
 		menus.map_index = clamp(menus.map_index, 0, max(menus.map_count - 1, 0))
@@ -241,6 +242,10 @@ menu_choice :: proc(match: ^Match, config: ^res.Client_Config, sounds: ^sound.So
 		match.loadout.secondary = a.weapon // every round's after, while I stay; the settings' stays as the settings say
 		me.loadout.secondary = a.weapon
 		if now do me.arsenal.secondary = sim.weapon_state(&match.game.resources, a.weapon)
+	case hud.Pick_Gear:
+		match.loadout.gear = .Rope if match.loadout.gear == .Jets else .Jets
+		me.loadout.gear = match.loadout.gear
+		if match.mode == .Offline do me.gear = match.loadout.gear // offline: the boots change now; online, the server applies them at the next spawn
 	case hud.Pick_Team: // offline I am placed on it; online the server places me, or among the watchers
 		if match.mode == .Online do say(match, false, false, fmt.tprintf("/team %d", int(a.team)))
 		else if a.team != me.team do match.team_asked = a.team
@@ -372,7 +377,7 @@ mine :: proc(game: ^sim.Game, me: ^sim.Soldier) -> (mine: hud.Mine) {
 	} else if gun.weapon != .Spas12 {
 		mine.ammo_bar = 1 - share(gun.reload_count, info.stats.reload_time)
 	}
-	if game.world.polymap.jet_fuel > 0 do mine.jets = share(me.body.jet_fuel, game.world.polymap.jet_fuel)
+	if game.world.polymap.jet_fuel > 0 && me.gear == .Jets do mine.jets = share(me.body.jet_fuel, game.world.polymap.jet_fuel) // a rope soldier has no jet bar
 	return
 
 	share :: proc(part, whole: i32) -> f32 {

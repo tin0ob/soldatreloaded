@@ -48,6 +48,7 @@ world_make :: proc(match: ^Match) -> bool {
 	name := utils.short_string_text(&n.map_name)
 	game.settings.max_grenades = n.grenades
 	game.settings.guns_off = n.guns_off
+	game.settings.rope = n.rope
 	if !sim.game_start_round(game, name, seed = 1, data_dir = n.map_dir) {
 		log.errorf("could not load the server's map %s", name)
 		return false

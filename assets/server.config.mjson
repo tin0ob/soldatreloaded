@@ -33,6 +33,8 @@ server: {
   aimbot_miss_chance: 5
   // the grenades a soldier carries at most, and is placed with, 0 to 5; 0 for none, and no grenade kits on the maps
   max_grenades: 2
+  // the rope gear replaces the jets for a soldier that chooses it in the weapons menu; off, every soldier's boots are jets
+  rope: true 
   // the percentage of players whose yes passes a vote
   vote_percent: 60
   // the folder of Lua scripts the server runs: every .lua in it, in name order (docs/scripting.md); a .lua.disabled is passed over; none ship with the server, and examples are at https://github.com/soldatreloaded/soldatreloaded-scripts; empty for none
@@ -82,7 +84,7 @@ network: {
 // whether, and how, the server lists itself for the game's server browser
 lobby: {
   // the server lists itself with the lobby
-  public: false
+  public: true 
   // the lobby it lists itself with
   url: "https://sr-lobby.fly.dev"
   // the IPv4 address the lobby lists; empty for the one the server reaches it from

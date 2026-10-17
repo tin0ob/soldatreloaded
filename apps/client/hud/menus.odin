@@ -39,6 +39,7 @@ Menus :: struct {
 	me:           sim.Soldier_Id,
 	map_count:    int,
 	guns_off:     res.Weapon_Set, // the guns the server gives nobody: greyed out, and never picked
+	rope:         bool,           // whether the rope is allowed here (sv_rope): the boots row is offered, or not
 	kick_index:   sim.Soldier_Id, // the player the kick window shows
 	map_index:    int,            // the map the map window shows
 }
@@ -48,6 +49,7 @@ Menu_Action :: union {
 	Leave,
 	Pick_Primary,
 	Pick_Secondary,
+	Pick_Gear,
 	Pick_Team,
 	Kick_Player,
 	Vote_Map,
@@ -66,6 +68,9 @@ Pick_Primary :: struct {
 Pick_Secondary :: struct {
 	weapon: res.Weapon,
 }
+
+// The boots: the match toggles the gear, jets to a rope and back.
+Pick_Gear :: struct {}
 
 Pick_Team :: struct {
 	team: res.Team,
@@ -108,6 +113,7 @@ ESCAPE_SIZE :: [2]f32{300, 200}
 WINDOW_BOX :: rl.Rectangle{125, 355, 370, 90}
 PRIMARIES :: 10 // the weapons menu's first buttons; the secondaries follow
 SECONDARIES :: 4
+BOOTS :: PRIMARIES + SECONDARIES // the weapons menu's boots row, when the game has the rope
 
 // A button where it is, and whether it is offered.
 Button :: struct {
@@ -177,6 +183,8 @@ menu_buttons :: proc(menus: ^Menus, menu: Menu) -> (buttons: Buttons) {
 			row := f32(i + 1 if i >= PRIMARIES else i) // a row's gap before the secondaries
 			sa.append(&buttons, Button{{35, 154 + 18 * row, 235, 18}, true}) // as tall as the rows are apart: no dead strip between them
 		}
+		// the boots row at the foot, when the game has the rope
+		if menus.rope do sa.append(&buttons, Button{{35, 154 + 18 * f32(BOOTS + 1), 235, 18}, true})
 	case .Kick, .Map:
 		b := WINDOW_BOX
 		choose: rl.Rectangle = {b.x + 105, b.y + 55, 90, 25} if menu == .Kick else {b.x + 120, b.y + 55, 90, 25}
@@ -266,6 +274,7 @@ choose :: proc(menus: ^Menus, menu: Menu, button: int) -> Menu_Action {
 		menus_show(menus, .Team, false)
 		return Pick_Team{res.Team(button + 1)}
 	case .Weapons:
+		if button == BOOTS do return Pick_Gear{} // the boots: the match toggles the gear
 		weapon := res.Weapon(button + 1)
 		if weapon in menus.guns_off do return nil
 		if button >= PRIMARIES do return Pick_Secondary{weapon}

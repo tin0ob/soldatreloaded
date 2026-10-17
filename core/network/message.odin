@@ -72,6 +72,7 @@ Msg_Hello :: struct {
 	look:      game.Look,  // how the player dresses its soldier, for the game
 	primary:   res.Weapon, // the loadout of its first placing
 	secondary: res.Weapon,
+	gear:      res.Gear,
 	hwid:      Hwid,       // the machine's, for the server's bans and mutes; last, after what a version check needs
 }
 
@@ -82,6 +83,7 @@ msg_hello :: proc(b: ^Buffer, m: ^Msg_Hello) {
 	fields_serialize(b, LOOK_FIELDS, &m.look, nil)
 	net_enum(b, &m.primary)
 	net_enum(b, &m.secondary)
+	net_enum(b, &m.gear)
 	net_string(b, &m.hwid)
 }
 
@@ -147,6 +149,7 @@ Msg_Map :: struct {
 	limit:    u16,               // the captures that win the round, for the HUD
 	grenades: u8,                // the grenades a soldier carries at most: none, and no grenade kits, for 0
 	guns_off: res.Weapon_Set,    // the guns the server gives nobody, for the weapons menu
+	rope:     bool,              // the rope gear is allowed (sv_rope): the weapons menu offers the boots row
 	hash:     [MAP_HASH_SIZE]u8, // the map's .pms, SHA-256: a copy with another isn't this map; zeros for any
 	art:      u8,                // its own art files, a Map_Art each to follow
 }
@@ -160,6 +163,7 @@ msg_map :: proc(b: ^Buffer, m: ^Msg_Map) {
 	off := transmute(u32)m.guns_off
 	net_u32(b, &off)
 	m.guns_off = transmute(res.Weapon_Set)off
+	net_bool(b, &m.rope)
 	for &byte in m.hash do net_u8(b, &byte)
 	net_u8(b, &m.art)
 }
