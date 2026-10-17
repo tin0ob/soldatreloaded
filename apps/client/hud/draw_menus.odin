@@ -83,6 +83,13 @@ draw_menus :: proc(u: ^ui.Ui, art: ^Art, menus: ^Menus, data: ^Hud_Data, dim: bo
 		buttons := menu_buttons(menus, .Weapons)
 		for b, i in sa.slice(&buttons) {
 			if !b.shown do continue
+			if i == BOOTS { // the boots row, at the foot
+				hover := hovered(.Weapons, hot_menu, i, hot)
+				at := [2]f32{b.rect.x + 85, b.rect.y + b.rect.height / 2 - 2}
+				if hover do at += {1, -1}
+				write(u, gear_caption(data), at, SMALL_FONT, CHOSEN_HOT_COLOR if hover else CHOSEN_COLOR)
+				continue
+			}
 			off := res.Weapon(i + 1) in menus.guns_off
 			hover := !off && hovered(.Weapons, hot_menu, i, hot)
 			at := [2]f32{b.rect.x + 85, b.rect.y + b.rect.height / 2 - 2}
@@ -159,6 +166,12 @@ draw_windows :: proc(u: ^ui.Ui, art: ^Art, menus: ^Menus, data: ^Hud_Data) {
 			write(u, WINDOW_CAPTIONS[window][Window_Button(i)], at, MENU_FONT, {255, 255, 255, 250})
 		}
 	}
+}
+
+// The boots row's caption, naming the gear it would switch to.
+@(private = "file")
+gear_caption :: proc(data: ^Hud_Data) -> string {
+	return "Boots: Rope" if data.loadout.gear == .Rope else "Boots: Jet"
 }
 
 // A weapons menu button's caption: a primary with its number key, or a secondary.

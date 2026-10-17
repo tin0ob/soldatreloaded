@@ -24,6 +24,8 @@ EYEWEAR_NAMES := [?]string{"None", "Sunglasses"}
 CHAIN_NAMES := [?]string{"None", "Dog tags", "Gold chain"}
 @(rodata)
 SECONDARY_NAMES := [?]string{"USSOCOM", "Combat Knife", "Chainsaw", "LAW"}
+@(rodata)
+GEAR_NAMES := [?]string{"Jets", "Rope"}
 
 // The rat and the furry wear only dreadlocks, punk, Mr. T, mullet and wolfcut, and no
 // headgear.
@@ -60,6 +62,7 @@ page_player :: proc(menu: ^Menu) {
 	ui.color_row(k, "Grenades", &menu.config.graphics.grenade_color)
 	ui.section(k, "LOADOUT")
 	secondary := weapon_select(k, "Secondary", &player.secondary_weapon, .USSOCOM, SECONDARY_NAMES[:])
+	ui.enum_select(k, "Boots", &player.gear, GEAR_NAMES[:])
 	ui.gap(k, 4)
 	if note := ui.row(k, 22, false); note.shown {
 		ui.text_mid(k, ui.BODY, "In a game you wear your team's shirt.", note.x + 12, note.y + 11, ui.FAINT)

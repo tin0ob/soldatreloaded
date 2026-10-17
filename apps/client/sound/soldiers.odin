@@ -61,11 +61,24 @@ soldier_sounds :: proc(s: ^Sound, game: ^sim.Game, id: sim.Soldier_Id) {
 		((legs.id == .Jump_Side && ((now.body.direction == -1 && .Right in buttons) || (now.body.direction == 1 && .Left in buttons))) ||
 				(legs.id == .Roll_Back && .Jump in buttons))
 	if !backflip {
-		if .Jet in buttons && now.body.jet_fuel > 0 {
+		if .Jet in buttons && now.body.jet_fuel > 0 && now.gear == .Jets {
 			reserved_play(s, &voices[.Jets], "rocketz.wav", at)
 		} else {
 			reserved_stop(s, &voices[.Jets])
 		}
+	}
+
+	// the rope: its throw's sound a second in, or as it lands — not on every press, so a
+	// quick throw and retract stays quiet
+	if now.rope.phase == .Throwing {
+		if was.rope.phase != .Throwing {
+			s.rope_ticks[id] = 1
+		} else if s.rope_ticks[id] < sim.TICK_RATE {
+			s.rope_ticks[id] += 1
+			if s.rope_ticks[id] == sim.TICK_RATE do play_at(s, "rope-sound.mp3", at)
+		}
+	} else if now.rope.phase == .Attached && was.rope.phase == .Throwing {
+		play_at(s, "rope-sound.mp3", at) // it landed
 	}
 
 	// the chainsaw: its idle rattle every 15 ticks, the cutting loop while the trigger is held

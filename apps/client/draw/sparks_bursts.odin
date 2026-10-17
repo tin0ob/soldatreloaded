@@ -86,6 +86,7 @@ sparks_event :: proc(sparks: ^Sparks, game: ^sim.Game, event: sim.Event) {
 	case sim.Explosion:    explosion(sparks, e)
 	case sim.Fired:        fired(sparks, game, e)
 	case sim.Antic:        antic(sparks, e)
+	case sim.Rope_Cut:     spark_add(sparks, .Little_Smoke, e.pos, {}, 25) // the rope's snap, wherever it was cut
 	case sim.Polygon_Effect:
 		#partial switch e.polygon {
 		case .Lava, .Explodes:

@@ -31,6 +31,7 @@ Event :: union {
 	Antic,
 	Flag_Drop,
 	Shot_End,
+	Rope_Cut,
 }
 
 MAX_EVENTS :: 256
@@ -201,4 +202,11 @@ Shot_End :: struct {
 	pos:    utils.Vec2,
 	blast:  Maybe(Explosion_Kind),
 	target: Maybe(Soldier_Id),
+}
+
+// A rope cut: by its owner's key press, a killing blow, or a bullet that crossed it.
+// For the sparks alone; never leaves the machine that made it.
+Rope_Cut :: struct {
+	soldier: Soldier_Id,
+	pos:     utils.Vec2,
 }

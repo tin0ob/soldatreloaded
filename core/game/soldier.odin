@@ -12,6 +12,8 @@ import "../utils"
 Soldier :: struct {
 	active:   bool `net:"served"`,
 	team:     res.Team `net:"served"`,
+	gear:     res.Gear `net:"served"`, // the gear worn this life: jets, or a rope where sv_rope allows it
+	rope:     Rope `net:"owned"`,  // the rope out, thrown or held; none otherwise
 	remote:   bool, // heard of, not played here: its keys move it but fire nothing
 	rng:      Rng `net:"served"`, // its own, so its client rolls what the server rolls
 
@@ -192,6 +194,7 @@ Carrying :: struct {
 Loadout :: struct {
 	primary:   res.Weapon,
 	secondary: res.Weapon,
+	gear:      res.Gear,
 }
 
 Tally :: struct {
@@ -313,6 +316,7 @@ soldier_spawn :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, resp
 	soldier^ = {
 		active = true,
 		team = respawn.team,
+		gear = respawn.gear,
 		remote = kept.remote,
 		rng = rng,
 		body = {
@@ -333,7 +337,7 @@ soldier_spawn :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, resp
 		aim = {distance = DEFAULT_AIM_DISTANCE, collider_distance = 255},
 		antics = {idle_time = DEFAULT_IDLE_TIME, idle_antic = -1, helmet = 1},
 		vitals = {health = DEFAULT_HEALTH, life = respawn.life, cease_fire = DEFAULT_CEASE_FIRE},
-		loadout = {primary = respawn.primary, secondary = respawn.secondary},
+		loadout = {primary = respawn.primary, secondary = respawn.secondary, gear = respawn.gear},
 		tally = kept.tally,
 		player = {look = kept.player.look, bot = kept.player.bot},
 	}
@@ -378,6 +382,7 @@ soldier_hurt :: proc(world: ^World, damage: Damage) {
 // down under it.
 soldier_kill :: proc(world: ^World, resources: ^Resources, kill: Kill) {
 	soldier := &world.soldiers[kill.target]
+	soldier.rope = {} // a killing blow cuts the rope it hung from (no spark: the death's own)
 	vitals := &soldier.vitals
 	vitals.death.pos = soldier.body.pos
 	vitals.death.velocity = soldier.body.velocity

@@ -54,6 +54,7 @@ Player_Settings :: struct {
 	eyewear:          Eyewear `jsoncomment:"none or sunglasses"`,
 	chain_style:      Chain_Style `jsoncomment:"none, dog_tags or gold_chain"`,
 	secondary_weapon: Weapon `jsoncomment:"the secondary each round begins with: ussocom, knife, chainsaw or law. The primary is picked anew each round, in the weapons menu."`,
+	gear:            Gear `jsoncomment:"the boots: jets, or a rope where the server allows it"`,
 }
 
 Gostek :: enum {
@@ -208,6 +209,7 @@ Offline_Settings :: struct {
 	capture_limit:      i32 `jsoncomment:"the captures that win a round"`,
 	respawn_time:       i32 `jsoncomment:"seconds a soldier waits at least to be placed again after a death; with more players than seconds, the dead come back together, in waves two seconds apart"`,
 	max_grenades:       i32 `jsoncomment:"the grenades a soldier carries at most, and is placed with"`,
+	rope:               bool `jsoncomment:"the rope gear replaces the jets for a soldier that chooses it; off, every soldier's boots are jets"`,
 	aimbot_bots:        bool `jsoncomment:"the bots lead every shot as the game will fly it, at the head, the chest or the legs; false for the original's aim, a guess spread by each bot's accuracy"`,
 	aimbot_miss_chance: i32 `jsoncomment:"with aimbot_bots, the percent of shots a bot of typical accuracy throws wide on purpose; a sharper bot fewer, a sloppier more, by its profile and the difficulty; 0 none"`,
 	bots:               Bot_Settings `jsoncomment:"the bots on each team, how well they play, whether they talk"`,

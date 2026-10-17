@@ -206,6 +206,7 @@ settings_from :: proc(config: ^res.Server_Config, weapons: res.Weapon_Table) -> 
 	s.respawn_min_wave = max(config.server.respawn_min_wave, 0) * game.TICK_RATE
 	s.respawn_max_wave = max(config.server.respawn_max_wave * game.TICK_RATE, s.respawn_min_wave)
 	s.max_grenades = clamp(config.server.max_grenades, 0, 5)
+	s.rope = config.server.rope
 	s.guns_off = res.guns_off(config.guns)
 	s.weapons = weapons
 	return s

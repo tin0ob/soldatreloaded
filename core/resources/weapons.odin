@@ -42,6 +42,13 @@ Weapon :: enum {
 // Weapons, as a set: the guns a server turns off.
 Weapon_Set :: bit_set[Weapon; u32]
 
+// The gear a soldier wears instead of the jets, chosen in the weapons menu and played
+// with the same button.
+Gear :: enum u8 {
+	Jets,
+	Rope,
+}
+
 // A weapon's numbers, in the units of Soldat's weapons.ini: times in ticks, sixty a second.
 Weapon_Stats :: struct {
 	damage:             f32, // the hit's strength: times the bullet's speed and the hitbox's modifier

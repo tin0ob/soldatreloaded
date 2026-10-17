@@ -33,6 +33,7 @@ Art :: struct {
 	bullets:       Bullet_Art,
 	things:        Thing_Art,
 	sparks:        Spark_Art,
+	hook:          Sprite, // the grapple at the rope's end
 }
 
 // The art for `polymap`: the mod's, the map's own in `map_dirs` (its folders of art, as it
@@ -75,6 +76,7 @@ art_sprites_load :: proc(art: ^Art, mod: res.Mod) {
 	art.bullets = bullets_load(source)
 	art.things = things_load(source)
 	art.sparks = sparks_load(source)
+	art.hook = sprite_load(source, "gostek-gfx/hook.png", nil)
 	atlas_mipmap(&art.sprite_atlas)
 }
 
@@ -119,6 +121,7 @@ draw_world :: proc(art: ^Art, game: ^sim.Game, frame: ^Frame, sparks: ^Sparks, c
 	draw_polygons(art, polymap, .Background)
 	if graphics.scenery do draw_scenery(art, polymap, .Behind_Map)
 	draw_bullets(&art.bullets, &game.world, frame.alpha, graphics.grenade_color, graphics.trails)
+	draw_ropes(art, game, frame)
 	draw_soldiers(art, game, frame, graphics.grenade_color, graphics.original_soldiers)
 	draw_things(&art.things, game, .Sprites, frame.alpha, seconds)
 	draw_sparks(&art.sparks, sparks, frame.alpha)

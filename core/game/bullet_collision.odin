@@ -229,6 +229,8 @@ bullet_collide :: proc(world: ^World, resources: ^Resources, id: Bullet_Id, auth
 		nearest = utils.length(stop - saved_old)
 	}
 
+	rope_collide(world, resources, id, nearest, out)
+
 	thing_collide(world, resources, bullet, nearest, out)
 }
 
@@ -652,6 +654,43 @@ body_collide :: proc(
 		}
 	}
 	return
+}
+
+// ---------------------------------------------------------------------------------
+// The ropes
+
+// A knife, LAW, M79 or Barrett cuts a rope it crosses; any other bullet passes it by.
+@(private = "file")
+rope_cuts :: proc(weapon: res.Weapon) -> bool {
+	#partial switch weapon {
+	case .Knife, .Thrown_Knife, .LAW, .M79, .Barrett:
+		return true
+	}
+	return false
+}
+
+// The cut is every machine's to compute (the bullets fly identically everywhere); the
+// Rope_Cut rope_cut emits is for the sparks alone. The bullet keeps flying.
+@(private = "file")
+rope_collide :: proc(world: ^World, resources: ^Resources, id: Bullet_Id, nearest: f32, out: ^Tick_Output) {
+	bullet := &world.bullets[id]
+	if !rope_cuts(bullet.weapon) do return
+	// The stab (the knife's flight is a single tick) sweeps the same line the body hit
+	// does: from the hand along the aim, out past the blade.
+	start, end := bullet.old_pos, bullet.pos
+	if bullet.style == .Knife || bullet.style == .Punch {
+		owner := &world.soldiers[bullet.owner]
+		owner_pose := soldier_pose(resources.animations, owner, owner.body.pos)
+		start = owner_pose[14] + hands_aim_direction(&owner_pose) * 4.0
+		end = bullet.pos + bullet.velocity
+	}
+	for &soldier, i in world.soldiers {
+		if !soldier.active || soldier.rope.phase == .None || Soldier_Id(i) == bullet.owner do continue // not your own rope
+		point, crosses := rope_crosses(resources, &soldier, start, end)
+		if !crosses do continue
+		if nearest > -1 && utils.length(point - bullet.old_pos) > nearest do continue // a nearer stop ends the flight before it
+		rope_cut(world, Soldier_Id(i), point, out)
+	}
 }
 
 // ---------------------------------------------------------------------------------

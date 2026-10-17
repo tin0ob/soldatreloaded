@@ -77,6 +77,7 @@ Snap_Word :: enum u8 {
 	Gone,  // no soldier in the slot
 	State, // the soldier's halves follow
 	Same,  // nothing this time: keep stepping it
+	Rope,  // the rope's fields follow, the rest stays as the client steps it
 }
 
 // What a snapshot says of the soldiers and the things: a word for each slot, and its
@@ -132,11 +133,17 @@ msg_snapshot_body :: proc(b: ^Buffer, m: ^Msg_Snapshot, base: ^Snap_Base) {
 	net_round(b, &m.match, base.round if base != nil else nil)
 	for &word, i in m.word {
 		net_enum(b, &word)
-		if word != .State do continue
-		against := &base.soldiers[i] if base != nil && base.word[i] == .State else nil
-		fields_serialize(b, SOLDIER_SERVED_FIELDS, &m.soldiers[i], against)
-		fields_serialize(b, SOLDIER_OWNED_FIELDS, &m.soldiers[i], against)
-		if against == nil do net_string(b, &m.names[i]) // a soldier going whole brings its name
+		switch word {
+		case .Gone, .Same:
+		case .State:
+			against := &base.soldiers[i] if base != nil && base.word[i] == .State else nil
+			fields_serialize(b, SOLDIER_SERVED_FIELDS, &m.soldiers[i], against)
+			fields_serialize(b, SOLDIER_OWNED_FIELDS, &m.soldiers[i], against)
+			if against == nil do net_string(b, &m.names[i]) // a soldier going whole brings its name
+		case .Rope:
+			against := &base.soldiers[i] if base != nil && (base.word[i] == .State || base.word[i] == .Rope) else nil
+			fields_serialize(b, ROPE_FIELDS, &m.soldiers[i].rope, &against.rope if against != nil else nil)
+		}
 	}
 	for &word, i in m.thing_word {
 		net_enum(b, &word)

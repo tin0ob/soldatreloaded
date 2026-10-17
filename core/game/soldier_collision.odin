@@ -29,11 +29,13 @@ Collision_Area :: enum {
 soldier_collide :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, authority: ^Authority, out: ^Tick_Output) {
 	soldier := &world.soldiers[id]
 	body := &soldier.body
+	was_grounded := body.on_ground_last // it stood on the ground the tick before: a rope out but still grounded is a throw, not a crash
 	body.on_ground = false
 	background_test_prepare(&body.background)
 
-	check_map_collision(world, resources, id, body.pos + {-3.5, -12}, .Head, authority, out)
-	check_map_collision(world, resources, id, body.pos + {3.5, -12}, .Head, authority, out)
+	touched :=
+		check_map_collision(world, resources, id, body.pos + {-3.5, -12}, .Head, authority, out)
+	touched ||= check_map_collision(world, resources, id, body.pos + {3.5, -12}, .Head, authority, out)
 
 	// the trailing leg lifted a little, so walking doesn't catch on slopes
 	body_y, arm_s: f32
@@ -55,12 +57,16 @@ soldier_collide :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, au
 	}
 
 	// the feet: the second side only if the first didn't touch
-	body.on_ground =
+	feet :=
 		check_map_collision(world, resources, id, body.pos + {2, 2 - body_y}, .Feet, authority, out) ||
 		check_map_collision(world, resources, id, body.pos + {-2, 2 - arm_s}, .Feet, authority, out)
+	body.on_ground = feet
+	touched ||= feet
 
 	body.on_ground_for_law = check_radius_map_collision(world, resources, id, body.pos + {0, -1}, body.on_ground, authority, out)
+	touched ||= body.on_ground_for_law
 	corners := check_map_vertices_collision(world, resources, id, body.pos, 3, body.on_ground || body.on_ground_for_law, authority, out)
+	touched ||= corners
 	body.on_ground = corners || body.on_ground
 
 	// the ground as it has stood two ticks running
@@ -68,6 +74,11 @@ soldier_collide :: proc(world: ^World, resources: ^Resources, id: Soldier_Id, au
 	body.on_ground_last = body.on_ground
 
 	background_test_reset(&body.background)
+
+	// A rope breaks the moment its owner's body meets a polygon it wasn't standing on:
+	// a swing into a wall, the ground or the ceiling cuts it, and the soldier falls with
+	// the momentum kept. Standing still to throw, the feet on the ground, does not.
+	if soldier.rope.phase != .None && touched && !was_grounded do rope_cut(world, id, soldier.body.pos, out)
 
 	body.velocity.x = clamp(body.velocity.x, -MAX_VELOCITY, MAX_VELOCITY)
 	body.velocity.y = clamp(body.velocity.y, -MAX_VELOCITY, MAX_VELOCITY)

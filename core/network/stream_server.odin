@@ -191,7 +191,8 @@ server_stream_snapshot :: proc(s: ^Server_Stream, g: ^game.Game, slot: game.Sold
 
 	// until it fits: fewer words first (they go next time regardless), then the farthest
 	// soldier or thing held back, never the receiver's own soldier; what is held back goes
-	// next time, whole if need be
+	// next time, whole if need be. A rope-out soldier is held back to Rope first — its rope
+	// still rides — and only to Same once every State is gone.
 	here := w.soldiers[slot].body.pos
 	event_max := WIRE_PER_PACKET
 	for {
@@ -211,6 +212,7 @@ server_stream_snapshot :: proc(s: ^Server_Stream, g: ^game.Game, slot: game.Sold
 			event_max /= 2
 			continue
 		}
+		// the farthest State soldier or thing, held back next
 		soldier, thing: int = -1, -1
 		far := f32(-1)
 		for i in 0 ..< game.MAX_PLAYERS {
@@ -226,9 +228,25 @@ server_stream_snapshot :: proc(s: ^Server_Stream, g: ^game.Game, slot: game.Sold
 			}
 		}
 		switch {
-		case thing >= 0:   m.thing_word[thing] = .Same
-		case soldier >= 0: m.word[soldier] = .Same
-		case:              return nil // not even alone
+		case thing >= 0:
+			m.thing_word[thing] = .Same
+		case soldier >= 0:
+			if w.soldiers[soldier].rope.phase != .None do m.word[soldier] = .Rope
+			else do m.word[soldier] = .Same
+		case:
+			// every State is held back: drop a Rope soldier's rope as the last resort
+			soldier, far = -1, -1
+			for i in 0 ..< game.MAX_PLAYERS {
+				if game.Soldier_Id(i) == slot || m.word[i] != .Rope do continue
+				if d := utils.length(w.soldiers[i].body.pos - here); d > far {
+					far, soldier = d, i
+				}
+			}
+			if soldier >= 0 {
+				m.word[soldier] = .Same
+			} else {
+				return nil // not even alone
+			}
 		}
 	}
 }

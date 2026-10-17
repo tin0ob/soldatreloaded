@@ -146,7 +146,11 @@ client_stream_hear :: proc(c: ^Client_Stream, g: ^game.Game, me: game.Soldier_Id
 		// the soldiers and things start from the base, where it carried them, so the delta
 		// lands on it
 		for i in 0 ..< game.MAX_PLAYERS {
-			if frame.word[i] == .State do m.soldiers[i] = frame.soldiers[i]
+			switch frame.word[i] {
+			case .State: m.soldiers[i] = frame.soldiers[i]
+			case .Rope:  m.soldiers[i].rope = frame.soldiers[i].rope
+			case .Gone, .Same:
+			}
 		}
 		for i in 0 ..< game.MAX_THINGS {
 			if frame.thing_word[i] == .State do m.things[i] = frame.things[i]
@@ -179,6 +183,8 @@ client_stream_hear :: proc(c: ^Client_Stream, g: ^game.Game, me: game.Soldier_Id
 		if m.word[i] == .State {
 			c.last_word[i] = m.tick
 			if m.names[i].length != 0 do c.names[i] = m.names[i]
+		} else if m.word[i] == .Rope {
+			c.last_word[i] = m.tick // its rope was heard of: it isn't quiet
 		} else if m.word[i] == .Same && g.world.soldiers[i].active {
 			c.stats.held_back += 1
 		}
@@ -294,20 +300,37 @@ soldier_apply :: proc(c: ^Client_Stream, g: ^game.Game, id: game.Soldier_Id, fra
 	if !placed do c.stats.correction += utils.length(jump)
 }
 
+// A soldier's rope as its Rope word has it: the rest keeps stepping, but the rope is the
+// owner's, always fresh.
+@(private = "file")
+rope_apply :: proc(c: ^Client_Stream, g: ^game.Game, id: game.Soldier_Id, frame: ^Snap_Frame) {
+	s := &g.world.soldiers[id]
+	fields_copy(ROPE_FIELDS, &s.rope, &frame.soldiers[id].rope)
+}
+
 // Every other soldier from its newest word no later than the tick on show, stepped on
 // to there, so a word that came late moves nothing that stepping had right; one with no
-// newer word keeps stepping as it is.
+// newer word keeps stepping as it is. A rope held back from the full state still comes,
+// fresh, and is laid over the stepped soldier.
 @(private = "file")
 soldiers_apply :: proc(c: ^Client_Stream, g: ^game.Game, me: game.Soldier_Id, v: u32) {
 	scratch := new(game.Tick_Output, context.temp_allocator)
 	for i in 0 ..< game.MAX_PLAYERS {
 		id := game.Soldier_Id(i)
 		if id == me do continue
+		// the newest full state, stepped on to the view
 		for t := min(v, c.newest); t > c.word_applied[i] && c.newest - t < STREAM_RING; t -= 1 {
 			frame := &c.snaps[t % STREAM_RING]
 			if frame.tick != t || frame.word[i] != .State do continue
 			soldier_apply(c, g, id, frame, int(v - t), scratch)
 			c.word_applied[i] = t
+			break
+		}
+		// a rope newer than that full state, held back from it, still comes fresh
+		for t := min(v, c.newest); t > c.word_applied[i] && c.newest - t < STREAM_RING; t -= 1 {
+			frame := &c.snaps[t % STREAM_RING]
+			if frame.tick != t || frame.word[i] != .Rope do continue
+			rope_apply(c, g, id, frame)
 			break
 		}
 	}

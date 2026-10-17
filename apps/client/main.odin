@@ -328,6 +328,7 @@ connect :: proc(client: ^Client, target: string) {
 		look      = match.look_of(config),
 		primary   = .Punch,
 		secondary = config.player.secondary_weapon,
+		gear      = config.player.gear,
 	}
 	utils.short_string_set(&hello.name, config.player.name)
 	utils.short_string_set(&hello.password, password)

@@ -55,6 +55,7 @@ Field_Table :: []Field
 SOLDIER_OWNED_FIELDS: Field_Table
 SOLDIER_SERVED_FIELDS: Field_Table
 SOLDIER_LOADOUT_FIELDS: Field_Table
+ROPE_FIELDS: Field_Table
 THING_FIELDS: Field_Table
 LOOK_FIELDS: Field_Table
 WEAPONS_FIELDS: Field_Table
@@ -66,6 +67,7 @@ tables_init :: proc "contextless" () {
 	SOLDIER_OWNED_FIELDS = fields_of(game.Soldier, "owned")
 	SOLDIER_SERVED_FIELDS = fields_of(game.Soldier, "served")
 	SOLDIER_LOADOUT_FIELDS = fields_of(game.Soldier, "loadout")
+	ROPE_FIELDS = fields_of(game.Rope, "")
 	THING_FIELDS = fields_of(game.Thing, "served")
 	LOOK_FIELDS = fields_of(game.Look, "")
 	WEAPONS_FIELDS = fields_of(Msg_Weapons, "")

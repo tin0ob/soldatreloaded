@@ -310,7 +310,7 @@ match_open :: proc(match: ^Match) {
 	hud.hud_init(&match.hud, match.mod)
 	match.zone, _ = timezone.region_load("local")
 	match.chat.big_scroll = 0
-	match.loadout = {.Punch, match.config.player.secondary_weapon} // the settings' secondary, as I join; my picks after
+	match.loadout = {.Punch, match.config.player.secondary_weapon, match.config.player.gear} // the settings' secondary and boots, as I join; my picks after
 }
 
 // The view on the world as it begins: the camera on me, the mouse the game's, and the
